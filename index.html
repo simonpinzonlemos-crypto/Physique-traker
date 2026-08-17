@@ -42,7 +42,7 @@
           </div>
         </div>
         <div class="macro-row">
-          <div class="macro-pill"><span class="dot dot-p"></span>Prot <b id="dash-protein">0</b>g</div>
+          <div class="macro-pill" id="dash-protein-pill"><span class="dot dot-p"></span>Prot <b id="dash-protein">0</b>/<span id="dash-protein-goal">--</span>g</div>
           <div class="macro-pill"><span class="dot dot-c"></span>Carb <b id="dash-carbs">0</b>g</div>
           <div class="macro-pill"><span class="dot dot-f"></span>Grasa <b id="dash-fat">0</b>g</div>
         </div>
@@ -91,7 +91,10 @@
     <div class="card">
       <div class="card-head">
         <p class="card-label">Hoy</p>
-        <p class="card-value" id="meals-today-total">0 kcal</p>
+        <div style="text-align:right;">
+          <p class="card-value" id="meals-today-total">0 kcal</p>
+          <p class="sub-stat" id="meals-today-protein" style="margin:2px 0 0;"></p>
+        </div>
       </div>
       <div id="meals-today-list" class="meal-list"></div>
     </div>
@@ -200,6 +203,9 @@
         </label>
         <label>Meta calórica diaria (opcional, vacío = auto)
           <input type="number" id="p-goal-calories" min="800" max="6000" placeholder="Automático">
+        </label>
+        <label>Meta de proteína diaria en g (opcional, vacío = auto según tu peso y objetivo)
+          <input type="number" id="p-goal-protein" min="20" max="400" placeholder="Automático">
         </label>
         <label>Meta de ejercicios por semana
           <input type="number" id="p-weekly-goal" min="1" max="14">

@@ -9,6 +9,7 @@ const DEFAULT_DATA = {
     heightCm: null,
     activityLevel: 'moderate',
     goalCalories: null,       // si es null, se calcula automáticamente (TDEE)
+    goalProtein: null,        // g/día; si es null, se calcula automáticamente según peso y objetivo
     goalMode: 'maintain',     // 'lose' | 'maintain' | 'gain'
     weeklyExerciseGoal: 4
   },

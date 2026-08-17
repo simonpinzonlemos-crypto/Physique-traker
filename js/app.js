@@ -78,6 +78,15 @@ function computeGoalCalories() {
   return Math.round(tdee);
 }
 
+function computeGoalProtein() {
+  const p = Store.data.profile;
+  if (p.goalProtein) return p.goalProtein;
+  const weight = getLatestWeight();
+  if (!weight) return null;
+  const gramsPerKg = { lose: 2.2, maintain: 1.6, gain: 1.8 };
+  return Math.round(weight * (gramsPerKg[p.goalMode] || 1.6));
+}
+
 // ==================== DASHBOARD ====================
 function renderDashboard() {
   const today = todayStr();
@@ -95,7 +104,10 @@ function renderDashboard() {
 
   document.getElementById('cal-consumed').textContent = consumed;
   document.getElementById('cal-goal').textContent = goal || '--';
+  const proteinGoal = computeGoalProtein();
   document.getElementById('dash-protein').textContent = Math.round(protein);
+  document.getElementById('dash-protein-goal').textContent = proteinGoal || '--';
+  document.getElementById('dash-protein-pill').classList.toggle('met', !!proteinGoal && protein >= proteinGoal);
   document.getElementById('dash-carbs').textContent = Math.round(carbs);
   document.getElementById('dash-fat').textContent = Math.round(fat);
 
@@ -199,7 +211,10 @@ function renderMeals() {
   const today = todayStr();
   const todayMeals = Store.data.meals.filter(m => m.date === today);
   const total = todayMeals.reduce((s, m) => s + m.calories, 0);
+  const proteinTotal = todayMeals.reduce((s, m) => s + m.protein, 0);
+  const proteinGoal = computeGoalProtein();
   document.getElementById('meals-today-total').textContent = `${total} kcal`;
+  document.getElementById('meals-today-protein').textContent = `Proteína: ${Math.round(proteinTotal)}/${proteinGoal || '--'}g`;
   renderMealList(document.getElementById('meals-today-list'), todayMeals, true);
 
   const history = Store.data.meals.filter(m => m.date !== today);
@@ -331,6 +346,7 @@ function renderSettings() {
   document.getElementById('p-activity').value = p.activityLevel;
   document.getElementById('p-goal-mode').value = p.goalMode;
   document.getElementById('p-goal-calories').value = p.goalCalories || '';
+  document.getElementById('p-goal-protein').value = p.goalProtein || '';
   document.getElementById('p-weekly-goal').value = p.weeklyExerciseGoal;
 }
 
@@ -540,6 +556,7 @@ function bindSettings() {
       activityLevel: document.getElementById('p-activity').value,
       goalMode: document.getElementById('p-goal-mode').value,
       goalCalories: Number(document.getElementById('p-goal-calories').value) || null,
+      goalProtein: Number(document.getElementById('p-goal-protein').value) || null,
       weeklyExerciseGoal: Number(document.getElementById('p-weekly-goal').value) || 4
     });
     toast('Perfil guardado ✅');
