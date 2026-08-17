@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Physique Tracker</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-inner">
+    <span class="app-logo">💪</span>
+    <h1>Physique Tracker</h1>
+  </div>
+</header>
+
+<main id="app-main">
+
+  <!-- ================= DASHBOARD ================= -->
+  <section id="view-dashboard" class="view active">
+    <div class="card hero-card">
+      <div class="hero-row">
+        <div>
+          <p class="hero-label" id="dash-date"></p>
+          <h2 id="dash-greeting">Hola 👋</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <p class="card-label">Calorías hoy</p>
+        <div class="cal-ring-wrap">
+          <svg viewBox="0 0 120 120" class="cal-ring">
+            <circle cx="60" cy="60" r="52" class="ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="ring-fg" id="cal-ring-fg"/>
+          </svg>
+          <div class="cal-ring-center">
+            <span id="cal-consumed">0</span>
+            <small>/ <span id="cal-goal">--</span> kcal</small>
+          </div>
+        </div>
+        <div class="macro-row">
+          <div class="macro-pill"><span class="dot dot-p"></span>Prot <b id="dash-protein">0</b>g</div>
+          <div class="macro-pill"><span class="dot dot-c"></span>Carb <b id="dash-carbs">0</b>g</div>
+          <div class="macro-pill"><span class="dot dot-f"></span>Grasa <b id="dash-fat">0</b>g</div>
+        </div>
+      </div>
+
+      <div class="stack-2">
+        <div class="card mini-card">
+          <p class="card-label">Peso actual</p>
+          <p class="big-stat" id="dash-weight">--</p>
+          <p class="sub-stat" id="dash-weight-change">Sin registros</p>
+        </div>
+        <div class="card mini-card">
+          <p class="card-label">Ejercicio esta semana</p>
+          <p class="big-stat" id="dash-exercise-count">0<small>/<span id="dash-exercise-goal">4</span></small></p>
+          <div class="week-dots" id="dash-week-dots"></div>
+        </div>
+        <div class="card mini-card">
+          <p class="card-label">% Grasa corporal (último)</p>
+          <p class="big-stat" id="dash-bodyfat">--</p>
+          <p class="sub-stat" id="dash-bodyfat-date">Sin registros</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <p class="card-label">Peso — últimas semanas</p>
+      </div>
+      <div id="dash-weight-chart" class="chart-box"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <p class="card-label">Comidas de hoy</p>
+      </div>
+      <div id="dash-today-meals" class="meal-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= COMIDAS / CALORÍAS ================= -->
+  <section id="view-meals" class="view">
+    <div class="view-actions">
+      <button class="btn btn-primary" id="btn-open-meal-manual">⚖️ Registrar comida por peso</button>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <p class="card-label">Hoy</p>
+        <p class="card-value" id="meals-today-total">0 kcal</p>
+      </div>
+      <div id="meals-today-list" class="meal-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <p class="card-label">Historial</p>
+      </div>
+      <div id="meals-history-list" class="meal-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= PESO ================= -->
+  <section id="view-weight" class="view">
+    <div class="view-actions">
+      <button class="btn btn-primary" id="btn-open-weight">⚖️ Registrar peso</button>
+    </div>
+
+    <div class="card">
+      <p class="card-label">Tendencia</p>
+      <div id="weight-chart" class="chart-box"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><p class="card-label">Historial</p></div>
+      <div id="weight-history-list" class="simple-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= EJERCICIO ================= -->
+  <section id="view-exercise" class="view">
+    <div class="view-actions">
+      <button class="btn btn-primary" id="btn-open-exercise">🏋️ Registrar ejercicio</button>
+    </div>
+
+    <div class="card">
+      <p class="card-label">Esta semana</p>
+      <p class="big-stat" id="ex-week-count">0<small>/<span id="ex-week-goal">4</span> sesiones</small></p>
+      <div class="week-dots" id="ex-week-dots"></div>
+    </div>
+
+    <div class="card">
+      <p class="card-label">Por semana (últimas 8)</p>
+      <div id="exercise-chart" class="chart-box"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><p class="card-label">Historial</p></div>
+      <div id="exercise-history-list" class="simple-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= GRASA CORPORAL ================= -->
+  <section id="view-bodyfat" class="view">
+    <div class="view-actions">
+      <button class="btn btn-primary" id="btn-open-bodyfat">📏 Calcular por medidas</button>
+    </div>
+    <p class="disclaimer">⚠️ Estimación por fórmula (método Marina de EE.UU.) a partir de tus medidas. Es una aproximación, no un diagnóstico clínico. Para mayor precisión usa plicometría, bioimpedancia o DEXA.</p>
+
+    <div class="card">
+      <p class="card-label">Tendencia</p>
+      <div id="bodyfat-chart" class="chart-box"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><p class="card-label">Historial</p></div>
+      <div id="bodyfat-history-list" class="simple-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= AJUSTES ================= -->
+  <section id="view-settings" class="view">
+    <div class="card">
+      <p class="card-label">Perfil</p>
+      <form id="form-profile" class="form-grid">
+        <label>Nombre
+          <input type="text" id="p-name" placeholder="Tu nombre">
+        </label>
+        <label>Sexo
+          <select id="p-sex">
+            <option value="male">Hombre</option>
+            <option value="female">Mujer</option>
+          </select>
+        </label>
+        <label>Edad
+          <input type="number" id="p-age" min="10" max="100">
+        </label>
+        <label>Altura (cm)
+          <input type="number" id="p-height" min="100" max="250">
+        </label>
+        <label>Nivel de actividad
+          <select id="p-activity">
+            <option value="sedentary">Sedentario (poco o nada de ejercicio)</option>
+            <option value="light">Ligero (1-3 días/semana)</option>
+            <option value="moderate">Moderado (3-5 días/semana)</option>
+            <option value="active">Activo (6-7 días/semana)</option>
+            <option value="veryActive">Muy activo (físico + entrenamiento intenso)</option>
+          </select>
+        </label>
+        <label>Objetivo
+          <select id="p-goal-mode">
+            <option value="lose">Perder grasa (déficit)</option>
+            <option value="maintain">Mantener</option>
+            <option value="gain">Ganar músculo (superávit)</option>
+          </select>
+        </label>
+        <label>Meta calórica diaria (opcional, vacío = auto)
+          <input type="number" id="p-goal-calories" min="800" max="6000" placeholder="Automático">
+        </label>
+        <label>Meta de ejercicios por semana
+          <input type="number" id="p-weekly-goal" min="1" max="14">
+        </label>
+        <button type="submit" class="btn btn-primary">Guardar perfil</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <p class="card-label">Datos</p>
+      <div class="view-actions">
+        <button class="btn btn-secondary" id="btn-export">⬇️ Exportar datos (JSON)</button>
+        <button class="btn btn-secondary" id="btn-import">⬆️ Importar datos</button>
+        <button class="btn btn-danger" id="btn-clear">🗑️ Borrar todos los datos</button>
+      </div>
+      <input type="file" id="input-import" accept="application/json" style="display:none">
+    </div>
+  </section>
+
+</main>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-view="dashboard"><span>🏠</span>Inicio</button>
+  <button class="nav-btn" data-view="meals"><span>🍽️</span>Comidas</button>
+  <button class="nav-btn" data-view="weight"><span>⚖️</span>Peso</button>
+  <button class="nav-btn" data-view="exercise"><span>🏋️</span>Ejercicio</button>
+  <button class="nav-btn" data-view="bodyfat"><span>📊</span>Grasa</button>
+  <button class="nav-btn" data-view="settings"><span>⚙️</span>Ajustes</button>
+</nav>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-overlay" id="modal-overlay">
+
+  <div class="modal" id="modal-weight">
+    <h3>Registrar peso</h3>
+    <form id="form-weight">
+      <label>Fecha
+        <input type="date" id="w-date" required>
+      </label>
+      <label>Peso (kg)
+        <input type="number" id="w-kg" step="0.1" min="20" max="400" required>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal" id="modal-exercise">
+    <h3>Registrar ejercicio</h3>
+    <form id="form-exercise">
+      <label>Fecha
+        <input type="date" id="e-date" required>
+      </label>
+      <label>Tipo
+        <select id="e-type">
+          <option>Pesas / Fuerza</option>
+          <option>Cardio</option>
+          <option>Running</option>
+          <option>Ciclismo</option>
+          <option>Natación</option>
+          <option>Deporte de equipo</option>
+          <option>Yoga / Movilidad</option>
+          <option>Otro</option>
+        </select>
+      </label>
+      <label>Duración (min)
+        <input type="number" id="e-duration" min="1" max="600" value="45">
+      </label>
+      <label>Notas (opcional)
+        <input type="text" id="e-notes" placeholder="Ej: día de piernas">
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal" id="modal-meal-manual">
+    <h3>Registrar comida por peso</h3>
+    <form id="form-meal-manual">
+      <label>Alimento
+        <input type="text" id="m-name" list="food-datalist" placeholder="Ej: Pechuga de pollo (cocida)" required>
+        <datalist id="food-datalist"></datalist>
+      </label>
+      <label>Cantidad (gramos)
+        <input type="number" id="m-grams" min="1" max="3000" value="100" required>
+      </label>
+      <div id="m-manual-result" class="ai-result"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="button" class="btn btn-secondary" id="btn-estimate-manual">Calcular</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-manual" disabled>Guardar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal" id="modal-bodyfat">
+    <h3>Calcular grasa corporal por medidas</h3>
+    <p class="hint-text">Método Marina de EE.UU. Mide con una cinta métrica, en cm, apretando ligeramente sin comprimir la piel.</p>
+    <form id="form-bodyfat">
+      <label>Fecha
+        <input type="date" id="bf-date" required>
+      </label>
+      <label>Altura (cm)
+        <input type="number" id="bf-height" min="100" max="250" required>
+      </label>
+      <label>Cuello (cm)
+        <input type="number" id="bf-neck" min="15" max="80" step="0.1" required>
+      </label>
+      <label>Cintura (cm) — a la altura del ombligo
+        <input type="number" id="bf-waist" min="40" max="200" step="0.1" required>
+      </label>
+      <label id="bf-hip-label">Cadera (cm) — solo mujeres
+        <input type="number" id="bf-hip" min="40" max="200" step="0.1">
+      </label>
+      <div id="bf-result" class="ai-result"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="button" class="btn btn-secondary" id="btn-calc-bodyfat">Calcular</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-bodyfat" disabled>Guardar</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/foods.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
