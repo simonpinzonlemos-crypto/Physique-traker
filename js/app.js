@@ -348,7 +348,36 @@ function renderSettings() {
   document.getElementById('p-goal-calories').value = p.goalCalories || '';
   document.getElementById('p-goal-protein').value = p.goalProtein || '';
   document.getElementById('p-weekly-goal').value = p.weeklyExerciseGoal;
-  document.getElementById('p-usda-key').value = p.usdaApiKey || '';
+  renderCustomFoodsSettings();
+}
+
+function renderCustomFoodsSettings() {
+  const container = document.getElementById('custom-foods-list');
+  const foods = Store.data.customFoods;
+  container.innerHTML = '';
+  if (!foods.length) {
+    container.innerHTML = '<p class="empty-hint">Aún no has agregado ninguno.</p>';
+    return;
+  }
+  [...foods].reverse().forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.innerHTML = `
+      <div class="li-main">
+        <p class="li-title">${escapeHtml(f.name)}</p>
+        <p class="li-sub">P${f.protein}g C${f.carbs}g G${f.fat}g /100g</p>
+      </div>
+      <div class="li-value">${f.kcal} kcal/100g</div>
+      <button class="li-del" data-del-custom-food="${f.id}">✕</button>
+    `;
+    container.appendChild(item);
+  });
+  container.querySelectorAll('[data-del-custom-food]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      Store.deleteCustomFood(btn.dataset.delCustomFood);
+      renderCustomFoodsSettings();
+    });
+  });
 }
 
 function escapeHtml(str) {
@@ -416,7 +445,7 @@ function bindExerciseModal() {
   });
 }
 
-// ---- Modal: Comida manual (por peso, búsqueda en Local + Open Food Facts + USDA) ----
+// ---- Modal: Comida manual (por peso, búsqueda en Local + personalizados + Open Food Facts) ----
 function bindMealManualModal() {
   let selectedFood = null;
   let searchToken = 0;
@@ -427,6 +456,7 @@ function bindMealManualModal() {
     document.getElementById('m-search-results').innerHTML = '';
     document.getElementById('m-search-status').textContent = '';
     document.getElementById('m-selected-box').style.display = 'none';
+    document.getElementById('custom-food-form').style.display = 'none';
     document.getElementById('btn-save-manual').disabled = true;
     selectedFood = null;
     openModal('modal-meal-manual');
@@ -456,10 +486,9 @@ function bindMealManualModal() {
 
     const status = document.getElementById('m-search-status');
     if (!results.length) {
-      status.textContent = 'Sin resultados. Prueba con otro nombre.';
-    } else if (errors.off || errors.usda) {
-      const failed = [errors.off && 'Open Food Facts', errors.usda && 'USDA'].filter(Boolean).join(' y ');
-      status.textContent = `${failed} no respondió, mostrando lo demás.`;
+      status.textContent = 'Sin resultados. Prueba con otro nombre o agrega el alimento a mano.';
+    } else if (errors.off) {
+      status.textContent = 'Open Food Facts no respondió, mostrando lo demás.';
     } else {
       status.textContent = '';
     }
@@ -473,7 +502,7 @@ function bindMealManualModal() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'food-result-item';
-      const badgeClass = item.source === 'Local' ? 'local' : item.source === 'USDA' ? 'usda' : 'off';
+      const badgeClass = item.source === 'Local' ? 'local' : item.source === 'Personal' ? 'personal' : 'off';
       btn.innerHTML = `
         <span class="food-source-badge ${badgeClass}">${item.source === 'Open Food Facts' ? 'OFF' : item.source}</span>
         <span class="fr-name">${escapeHtml(item.name)}${item.brand ? ' · ' + escapeHtml(item.brand) : ''}</span>
@@ -508,6 +537,35 @@ function bindMealManualModal() {
   }
 
   document.getElementById('m-grams').addEventListener('input', updateComputed);
+
+  document.getElementById('btn-add-custom-food').addEventListener('click', () => {
+    const formDiv = document.getElementById('custom-food-form');
+    const showing = formDiv.style.display !== 'none';
+    formDiv.style.display = showing ? 'none' : 'block';
+    if (!showing) {
+      document.getElementById('cf-name').value = document.getElementById('m-search').value.trim();
+      document.getElementById('cf-kcal').value = '';
+      document.getElementById('cf-protein').value = '';
+      document.getElementById('cf-carbs').value = '';
+      document.getElementById('cf-fat').value = '';
+    }
+  });
+
+  document.getElementById('btn-save-custom-food').addEventListener('click', () => {
+    const name = document.getElementById('cf-name').value.trim();
+    const kcal = Number(document.getElementById('cf-kcal').value);
+    if (!name || !kcal) { toast('Completa al menos el nombre y las calorías por 100g'); return; }
+    const saved = Store.addCustomFood({
+      name,
+      kcal,
+      protein: document.getElementById('cf-protein').value,
+      carbs: document.getElementById('cf-carbs').value,
+      fat: document.getElementById('cf-fat').value
+    });
+    document.getElementById('custom-food-form').style.display = 'none';
+    toast('Alimento guardado en tu lista ✅');
+    selectFood({ name: saved.name, brand: '', kcal: saved.kcal, protein: saved.protein, carbs: saved.carbs, fat: saved.fat, source: 'Personal' });
+  });
 
   document.getElementById('form-meal-manual').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -609,12 +667,6 @@ function bindSettings() {
     });
     toast('Perfil guardado ✅');
     renderDashboard();
-  });
-
-  document.getElementById('form-usda-key').addEventListener('submit', (e) => {
-    e.preventDefault();
-    Store.updateProfile({ usdaApiKey: document.getElementById('p-usda-key').value.trim() });
-    toast('Clave USDA guardada ✅');
   });
 
   document.getElementById('btn-export').addEventListener('click', () => {

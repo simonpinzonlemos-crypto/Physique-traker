@@ -193,7 +193,7 @@ input:focus, select:focus { outline: none; border-color: var(--accent); }
 .food-source-badge { font-size: 9.5px; text-transform: uppercase; letter-spacing: .03em; padding: 2px 6px; border-radius: 999px; background: var(--bg-card-hover); color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
 .food-source-badge.local { color: var(--accent); }
 .food-source-badge.off { color: var(--blue); }
-.food-source-badge.usda { color: var(--orange); }
+.food-source-badge.personal { color: var(--orange); }
 
 .toast {
   position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);

@@ -215,12 +215,9 @@
     </div>
 
     <div class="card">
-      <p class="card-label">Búsqueda de alimentos</p>
-      <p class="hint-text">La búsqueda de comidas usa una base local (con platos colombianos) más las bases públicas de <span class="code">Open Food Facts</span> y <span class="code">USDA FoodData Central</span>. Por defecto USDA usa una clave de demostración con límite bajo de consultas; si buscas mucho y empieza a fallar, consigue tu clave gratuita en <span class="code">api.data.gov/signup</span> y pégala aquí.</p>
-      <form id="form-usda-key" class="form-inline">
-        <input type="text" id="p-usda-key" placeholder="Clave USDA (opcional)">
-        <button type="submit" class="btn btn-primary">Guardar</button>
-      </form>
+      <p class="card-label">Mis alimentos personalizados</p>
+      <p class="hint-text">Los que agregues a mano desde "Registrar comida" cuando no aparezcan en la búsqueda.</p>
+      <div id="custom-foods-list" class="simple-list"></div>
     </div>
 
     <div class="card">
@@ -303,6 +300,28 @@
       </label>
       <p class="hint-text" id="m-search-status" style="margin:0 0 8px;"></p>
       <div id="m-search-results" class="food-results"></div>
+
+      <button type="button" class="btn btn-ghost" id="btn-add-custom-food" style="width:100%; margin-bottom:12px;">+ Agregar alimento que no aparece</button>
+      <div id="custom-food-form" style="display:none; margin-bottom:12px;">
+        <label>Nombre del alimento
+          <input type="text" id="cf-name" placeholder="Ej: Sopa de mi abuela">
+        </label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+          <label>Calorías /100g
+            <input type="number" id="cf-kcal" min="0" max="900">
+          </label>
+          <label>Proteína /100g (g)
+            <input type="number" id="cf-protein" min="0" max="100" step="0.1">
+          </label>
+          <label>Carbohidratos /100g (g)
+            <input type="number" id="cf-carbs" min="0" max="100" step="0.1">
+          </label>
+          <label>Grasa /100g (g)
+            <input type="number" id="cf-fat" min="0" max="100" step="0.1">
+          </label>
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-save-custom-food" style="width:100%; margin-top:8px;">Guardar y usar en esta comida</button>
+      </div>
 
       <div id="m-selected-box" class="ai-result" style="display:none;">
         <p class="ar-title" id="m-selected-name"></p>

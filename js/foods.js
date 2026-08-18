@@ -100,19 +100,23 @@ const FOOD_DB = [
   { name: 'Masato', kcal: 55, protein: 0.3, carbs: 13, fat: 0.1 },
 ];
 
-// ---- Búsqueda en la base local ----
-function searchLocalFoodDB(query, limit = 8) {
+// ---- Búsqueda en la base local (genérica/colombiana + alimentos personalizados del usuario) ----
+function searchLocalFoodDB(query, limit = 10) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
+  const pool = [
+    ...FOOD_DB.map(f => ({ ...f, source: 'Local' })),
+    ...(Store.data.customFoods || []).map(f => ({ ...f, source: 'Personal' }))
+  ];
   const starts = [];
   const contains = [];
-  FOOD_DB.forEach(f => {
+  pool.forEach(f => {
     const n = f.name.toLowerCase();
     if (n.startsWith(q)) starts.push(f);
     else if (n.includes(q)) contains.push(f);
   });
   return [...starts, ...contains].slice(0, limit).map(f => ({
-    name: f.name, brand: '', kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat, source: 'Local'
+    name: f.name, brand: '', kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat, source: f.source
   }));
 }
 
@@ -152,44 +156,16 @@ async function searchOpenFoodFacts(query, limit = 6) {
     }));
 }
 
-// ==================== USDA FoodData Central (API pública, DEMO_KEY por defecto) ====================
-async function searchUSDA(query, limit = 6) {
-  const apiKey = (Store.data.profile.usdaApiKey || '').trim() || 'DEMO_KEY';
-  const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${encodeURIComponent(apiKey)}&query=${encodeURIComponent(query)}&pageSize=${limit}&dataType=Foundation,SR%20Legacy,Survey%20(FNDDS)`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Error consultando USDA FoodData Central');
-  const json = await res.json();
-  const nutrientValue = (foodNutrients, name, unit) => {
-    const matches = (foodNutrients || []).filter(n => n.nutrientName === name);
-    const n = (unit && matches.find(m => m.unitName === unit)) || matches[0];
-    return n ? Number(n.value) || 0 : 0;
-  };
-  return (json.foods || []).slice(0, limit).map(f => ({
-    name: f.description ? f.description.charAt(0) + f.description.slice(1).toLowerCase() : 'Alimento',
-    brand: f.brandName || '',
-    kcal: nutrientValue(f.foodNutrients, 'Energy', 'KCAL'),
-    protein: nutrientValue(f.foodNutrients, 'Protein'),
-    carbs: nutrientValue(f.foodNutrients, 'Carbohydrate, by difference'),
-    fat: nutrientValue(f.foodNutrients, 'Total lipid (fat)'),
-    source: 'USDA'
-  }));
-}
-
 // ==================== Búsqueda combinada ====================
-// Combina la base local (instantánea) con Open Food Facts y USDA (en paralelo, tolerando fallos).
+// Combina la base local + personal (instantánea) con Open Food Facts (tolerando fallos).
 async function searchAllFoodSources(query) {
   const local = searchLocalFoodDB(query);
-  const [offResult, usdaResult] = await Promise.allSettled([
-    searchOpenFoodFacts(query),
-    searchUSDA(query)
-  ]);
+  const [offResult] = await Promise.allSettled([searchOpenFoodFacts(query)]);
   const off = offResult.status === 'fulfilled' ? offResult.value : [];
-  const usda = usdaResult.status === 'fulfilled' ? usdaResult.value : [];
   return {
-    results: [...local, ...usda, ...off].filter(r => r.kcal > 0).slice(0, 20),
+    results: [...local, ...off].filter(r => r.kcal > 0).slice(0, 20),
     errors: {
-      off: offResult.status === 'rejected',
-      usda: usdaResult.status === 'rejected'
+      off: offResult.status === 'rejected'
     }
   };
 }

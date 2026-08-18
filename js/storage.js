@@ -11,13 +11,13 @@ const DEFAULT_DATA = {
     goalCalories: null,       // si es null, se calcula automáticamente (TDEE)
     goalProtein: null,        // g/día; si es null, se calcula automáticamente según peso y objetivo
     goalMode: 'maintain',     // 'lose' | 'maintain' | 'gain'
-    weeklyExerciseGoal: 4,
-    usdaApiKey: ''            // opcional; si está vacío se usa DEMO_KEY (límite de tasa más bajo)
+    weeklyExerciseGoal: 4
   },
   weights: [],     // {id, date, kg}
   meals: [],       // {id, date, time, description, calories, protein, carbs, fat}
   exercises: [],   // {id, date, type, durationMin, notes}
-  bodyfat: []      // {id, date, percentage, heightCm, neckCm, waistCm, hipCm}
+  bodyfat: [],     // {id, date, percentage, heightCm, neckCm, waistCm, hipCm}
+  customFoods: []  // {id, name, kcal, protein, carbs, fat} — alimentos que el usuario agrega a mano
 };
 
 function loadData() {
@@ -31,7 +31,8 @@ function loadData() {
       weights: parsed.weights || [],
       meals: parsed.meals || [],
       exercises: parsed.exercises || [],
-      bodyfat: parsed.bodyfat || []
+      bodyfat: parsed.bodyfat || [],
+      customFoods: parsed.customFoods || []
     };
   } catch (e) {
     console.error('Error leyendo datos locales, se reinicia el almacenamiento.', e);
@@ -137,6 +138,25 @@ const Store = {
     this.save();
   },
 
+  // --- alimentos personalizados ---
+  addCustomFood(food) {
+    const entry = {
+      id: genId(),
+      name: (food.name || '').trim(),
+      kcal: Math.round(Number(food.kcal) || 0),
+      protein: Math.round((Number(food.protein) || 0) * 10) / 10,
+      carbs: Math.round((Number(food.carbs) || 0) * 10) / 10,
+      fat: Math.round((Number(food.fat) || 0) * 10) / 10
+    };
+    this.data.customFoods.push(entry);
+    this.save();
+    return entry;
+  },
+  deleteCustomFood(id) {
+    this.data.customFoods = this.data.customFoods.filter(f => f.id !== id);
+    this.save();
+  },
+
   exportJSON() {
     return JSON.stringify(this.data, null, 2);
   },
@@ -147,7 +167,8 @@ const Store = {
       weights: parsed.weights || [],
       meals: parsed.meals || [],
       exercises: parsed.exercises || [],
-      bodyfat: parsed.bodyfat || []
+      bodyfat: parsed.bodyfat || [],
+      customFoods: parsed.customFoods || []
     };
     this.save();
   }
