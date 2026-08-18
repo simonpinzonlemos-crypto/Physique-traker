@@ -348,6 +348,7 @@ function renderSettings() {
   document.getElementById('p-goal-calories').value = p.goalCalories || '';
   document.getElementById('p-goal-protein').value = p.goalProtein || '';
   document.getElementById('p-weekly-goal').value = p.weeklyExerciseGoal;
+  document.getElementById('p-usda-key').value = p.usdaApiKey || '';
 }
 
 function escapeHtml(str) {
@@ -358,14 +359,6 @@ function escapeHtml(str) {
 
 // ==================== INIT ====================
 function init() {
-  // datalist de alimentos
-  const datalist = document.getElementById('food-datalist');
-  FOOD_DB.forEach(f => {
-    const opt = document.createElement('option');
-    opt.value = f.name;
-    datalist.appendChild(opt);
-  });
-
   // navegación
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => switchView(btn.dataset.view));
@@ -423,55 +416,110 @@ function bindExerciseModal() {
   });
 }
 
-// ---- Modal: Comida manual (por peso) ----
+// ---- Modal: Comida manual (por peso, búsqueda en Local + Open Food Facts + USDA) ----
 function bindMealManualModal() {
-  let lastResult = null;
+  let selectedFood = null;
+  let searchToken = 0;
+  let searchDebounce = null;
 
   document.getElementById('btn-open-meal-manual').addEventListener('click', () => {
     document.getElementById('form-meal-manual').reset();
-    document.getElementById('m-grams').value = 100;
-    document.getElementById('m-manual-result').classList.remove('show');
+    document.getElementById('m-search-results').innerHTML = '';
+    document.getElementById('m-search-status').textContent = '';
+    document.getElementById('m-selected-box').style.display = 'none';
     document.getElementById('btn-save-manual').disabled = true;
-    lastResult = null;
+    selectedFood = null;
     openModal('modal-meal-manual');
+    setTimeout(() => document.getElementById('m-search').focus(), 50);
   });
 
-  document.getElementById('btn-estimate-manual').addEventListener('click', () => {
-    const name = document.getElementById('m-name').value.trim();
-    const grams = document.getElementById('m-grams').value;
-    if (!name || !grams) { toast('Completa el alimento y los gramos'); return; }
+  document.getElementById('m-search').addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    clearTimeout(searchDebounce);
+    document.getElementById('m-selected-box').style.display = 'none';
+    document.getElementById('btn-save-manual').disabled = true;
+    selectedFood = null;
 
-    const resultBox = document.getElementById('m-manual-result');
-
-    const result = estimateFromLocalDB(name, grams);
-    if (!result) {
-      resultBox.innerHTML = `<p class="ar-title">No encontrado en la base de datos</p><p class="li-sub">Prueba con un nombre más simple (ej: "pollo", "arroz", "huevo"). Puedes ver las opciones escribiendo en el campo — se sugieren mientras escribes.</p>`;
-      resultBox.classList.add('show');
-      document.getElementById('btn-save-manual').disabled = true;
+    if (query.length < 2) {
+      document.getElementById('m-search-results').innerHTML = '';
+      document.getElementById('m-search-status').textContent = '';
       return;
     }
-
-    lastResult = { ...result, name: result.matchedName || name, grams };
-    resultBox.innerHTML = `
-      <p class="ar-title">${escapeHtml(lastResult.name)} · ${grams} g</p>
-      <div class="ar-row"><span>Calorías</span><b>${result.calories} kcal</b></div>
-      <div class="ar-row"><span>Proteína</span><span>${result.protein} g</span></div>
-      <div class="ar-row"><span>Carbohidratos</span><span>${result.carbs} g</span></div>
-      <div class="ar-row"><span>Grasa</span><span>${result.fat} g</span></div>
-    `;
-    resultBox.classList.add('show');
-    document.getElementById('btn-save-manual').disabled = false;
+    document.getElementById('m-search-status').textContent = 'Buscando…';
+    searchDebounce = setTimeout(() => runFoodSearch(query), 450);
   });
+
+  async function runFoodSearch(query) {
+    const myToken = ++searchToken;
+    const { results, errors } = await searchAllFoodSources(query);
+    if (myToken !== searchToken) return; // llegó una búsqueda más nueva mientras esperábamos
+
+    const status = document.getElementById('m-search-status');
+    if (!results.length) {
+      status.textContent = 'Sin resultados. Prueba con otro nombre.';
+    } else if (errors.off || errors.usda) {
+      const failed = [errors.off && 'Open Food Facts', errors.usda && 'USDA'].filter(Boolean).join(' y ');
+      status.textContent = `${failed} no respondió, mostrando lo demás.`;
+    } else {
+      status.textContent = '';
+    }
+    renderFoodResults(results);
+  }
+
+  function renderFoodResults(items) {
+    const container = document.getElementById('m-search-results');
+    container.innerHTML = '';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'food-result-item';
+      const badgeClass = item.source === 'Local' ? 'local' : item.source === 'USDA' ? 'usda' : 'off';
+      btn.innerHTML = `
+        <span class="food-source-badge ${badgeClass}">${item.source === 'Open Food Facts' ? 'OFF' : item.source}</span>
+        <span class="fr-name">${escapeHtml(item.name)}${item.brand ? ' · ' + escapeHtml(item.brand) : ''}</span>
+        <span class="fr-kcal">${Math.round(item.kcal)} kcal/100g</span>
+      `;
+      btn.addEventListener('click', () => selectFood(item, btn));
+      container.appendChild(btn);
+    });
+  }
+
+  function selectFood(item, btnEl) {
+    selectedFood = item;
+    document.querySelectorAll('.food-result-item').forEach(b => b.classList.remove('selected'));
+    if (btnEl) btnEl.classList.add('selected');
+    document.getElementById('m-selected-box').style.display = 'block';
+    document.getElementById('m-selected-name').textContent = `${item.name}${item.brand ? ' · ' + item.brand : ''} (${item.source})`;
+    if (!document.getElementById('m-grams').value) document.getElementById('m-grams').value = 100;
+    updateComputed();
+    document.getElementById('btn-save-manual').disabled = false;
+  }
+
+  function updateComputed() {
+    if (!selectedFood) return;
+    const grams = Number(document.getElementById('m-grams').value) || 0;
+    const factor = grams / 100;
+    document.getElementById('m-computed').innerHTML = `
+      <div class="ar-row"><span>Calorías</span><b>${Math.round(selectedFood.kcal * factor)} kcal</b></div>
+      <div class="ar-row"><span>Proteína</span><span>${Math.round(selectedFood.protein * factor * 10) / 10} g</span></div>
+      <div class="ar-row"><span>Carbohidratos</span><span>${Math.round(selectedFood.carbs * factor * 10) / 10} g</span></div>
+      <div class="ar-row"><span>Grasa</span><span>${Math.round(selectedFood.fat * factor * 10) / 10} g</span></div>
+    `;
+  }
+
+  document.getElementById('m-grams').addEventListener('input', updateComputed);
 
   document.getElementById('form-meal-manual').addEventListener('submit', (e) => {
     e.preventDefault();
-    if (!lastResult) return;
+    if (!selectedFood) return;
+    const grams = Number(document.getElementById('m-grams').value) || 0;
+    const factor = grams / 100;
     Store.addMeal({
-      description: `${lastResult.name} (${lastResult.grams} g)`,
-      calories: lastResult.calories,
-      protein: lastResult.protein,
-      carbs: lastResult.carbs,
-      fat: lastResult.fat
+      description: `${selectedFood.name} (${grams} g)`,
+      calories: Math.round(selectedFood.kcal * factor),
+      protein: Math.round(selectedFood.protein * factor * 10) / 10,
+      carbs: Math.round(selectedFood.carbs * factor * 10) / 10,
+      fat: Math.round(selectedFood.fat * factor * 10) / 10
     });
     closeModal();
     toast('Comida registrada ✅');
@@ -561,6 +609,12 @@ function bindSettings() {
     });
     toast('Perfil guardado ✅');
     renderDashboard();
+  });
+
+  document.getElementById('form-usda-key').addEventListener('submit', (e) => {
+    e.preventDefault();
+    Store.updateProfile({ usdaApiKey: document.getElementById('p-usda-key').value.trim() });
+    toast('Clave USDA guardada ✅');
   });
 
   document.getElementById('btn-export').addEventListener('click', () => {

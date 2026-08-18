@@ -11,7 +11,8 @@ const DEFAULT_DATA = {
     goalCalories: null,       // si es null, se calcula automáticamente (TDEE)
     goalProtein: null,        // g/día; si es null, se calcula automáticamente según peso y objetivo
     goalMode: 'maintain',     // 'lose' | 'maintain' | 'gain'
-    weeklyExerciseGoal: 4
+    weeklyExerciseGoal: 4,
+    usdaApiKey: ''            // opcional; si está vacío se usa DEMO_KEY (límite de tasa más bajo)
   },
   weights: [],     // {id, date, kg}
   meals: [],       // {id, date, time, description, calories, protein, carbs, fat}

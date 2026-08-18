@@ -1,6 +1,7 @@
-// Base de alimentos comunes: valores por cada 100 g (aprox.)
-// kcal, proteína (g), carbohidratos (g), grasa (g)
+// ==================== Base de datos local (genérica + colombiana) ====================
+// Valores por cada 100 g (aprox.). kcal, proteína (g), carbohidratos (g), grasa (g).
 const FOOD_DB = [
+  // --- Genéricos ---
   { name: 'Pechuga de pollo (cocida)', kcal: 165, protein: 31, carbs: 0, fat: 3.6 },
   { name: 'Arroz blanco (cocido)', kcal: 130, protein: 2.7, carbs: 28, fat: 0.3 },
   { name: 'Arroz integral (cocido)', kcal: 123, protein: 2.6, carbs: 26, fat: 1 },
@@ -38,8 +39,84 @@ const FOOD_DB = [
   { name: 'Tofu', kcal: 76, protein: 8, carbs: 1.9, fat: 4.8 },
   { name: 'Pechuga de pavo (cocida)', kcal: 135, protein: 30, carbs: 0, fat: 1 },
   { name: 'Whey protein (polvo)', kcal: 400, protein: 80, carbs: 8, fat: 6 },
+
+  // --- Base propia colombiana ---
+  { name: 'Arepa de maíz (asada)', kcal: 215, protein: 5, carbs: 44, fat: 2 },
+  { name: 'Arepa de queso', kcal: 280, protein: 9, carbs: 40, fat: 9 },
+  { name: 'Arepa boyacense (dulce)', kcal: 250, protein: 5, carbs: 45, fat: 5 },
+  { name: 'Patacón (plátano verde frito)', kcal: 250, protein: 1.5, carbs: 32, fat: 13 },
+  { name: 'Plátano maduro frito (tajadas)', kcal: 230, protein: 1, carbs: 40, fat: 8 },
+  { name: 'Yuca cocida', kcal: 160, protein: 1.4, carbs: 38, fat: 0.3 },
+  { name: 'Ñame cocido', kcal: 118, protein: 1.5, carbs: 27, fat: 0.2 },
+  { name: 'Papa criolla (cocida)', kcal: 90, protein: 2, carbs: 20, fat: 0.2 },
+  { name: 'Chicharrón', kcal: 610, protein: 35, carbs: 0, fat: 53 },
+  { name: 'Chorizo colombiano (asado)', kcal: 350, protein: 19, carbs: 3, fat: 29 },
+  { name: 'Morcilla/rellena', kcal: 320, protein: 15, carbs: 10, fat: 25 },
+  { name: 'Frijoles antioqueños (con garra, cocidos)', kcal: 140, protein: 8, carbs: 22, fat: 3 },
+  { name: 'Sancocho (caldo con pollo y verduras)', kcal: 90, protein: 6, carbs: 10, fat: 3 },
+  { name: 'Ajiaco bogotano', kcal: 85, protein: 4, carbs: 12, fat: 2 },
+  { name: 'Changua', kcal: 50, protein: 3, carbs: 4, fat: 2 },
+  { name: 'Mondongo', kcal: 110, protein: 8, carbs: 8, fat: 5 },
+  { name: 'Lechona', kcal: 300, protein: 18, carbs: 15, fat: 19 },
+  { name: 'Tamal colombiano', kcal: 210, protein: 8, carbs: 25, fat: 9 },
+  { name: 'Empanada de carne (frita)', kcal: 260, protein: 7, carbs: 28, fat: 13 },
+  { name: 'Buñuelo', kcal: 330, protein: 8, carbs: 30, fat: 20 },
+  { name: 'Pandebono', kcal: 300, protein: 9, carbs: 40, fat: 11 },
+  { name: 'Almojábana', kcal: 310, protein: 8, carbs: 38, fat: 13 },
+  { name: 'Arequipe/dulce de leche', kcal: 315, protein: 6, carbs: 55, fat: 8 },
+  { name: 'Bocadillo de guayaba', kcal: 290, protein: 0.3, carbs: 73, fat: 0.1 },
+  { name: 'Panela', kcal: 380, protein: 0, carbs: 98, fat: 0 },
+  { name: 'Aguapanela', kcal: 40, protein: 0, carbs: 10, fat: 0 },
+  { name: 'Chocolate santafereño (con leche)', kcal: 70, protein: 2, carbs: 10, fat: 2.5 },
+  { name: 'Queso costeño', kcal: 330, protein: 22, carbs: 2, fat: 26 },
+  { name: 'Queso campesino', kcal: 280, protein: 20, carbs: 3, fat: 21 },
+  { name: 'Cuajada', kcal: 290, protein: 18, carbs: 3, fat: 23 },
+  { name: 'Suero costeño', kcal: 90, protein: 3, carbs: 4, fat: 7 },
+  { name: 'Arroz con coco', kcal: 200, protein: 3, carbs: 33, fat: 6 },
+  { name: 'Arroz atollado', kcal: 180, protein: 6, carbs: 28, fat: 5 },
+  { name: 'Carne asada (res, a la parrilla)', kcal: 250, protein: 26, carbs: 0, fat: 16 },
+  { name: 'Pollo asado (con piel)', kcal: 215, protein: 27, carbs: 0, fat: 11 },
+  { name: 'Costillas de cerdo (BBQ)', kcal: 280, protein: 24, carbs: 4, fat: 19 },
+  { name: 'Sobrebarriga', kcal: 230, protein: 22, carbs: 2, fat: 15 },
+  { name: 'Bagre frito', kcal: 230, protein: 18, carbs: 8, fat: 14 },
+  { name: 'Mojarra frita', kcal: 210, protein: 19, carbs: 3, fat: 14 },
+  { name: 'Tilapia (cocida)', kcal: 128, protein: 26, carbs: 0, fat: 2.7 },
+  { name: 'Cuchuco de trigo/cebada (sopa)', kcal: 70, protein: 3, carbs: 12, fat: 1 },
+  { name: 'Guayaba', kcal: 68, protein: 2.6, carbs: 14, fat: 1 },
+  { name: 'Lulo', kcal: 28, protein: 1, carbs: 6, fat: 0.2 },
+  { name: 'Maracuyá', kcal: 97, protein: 2.2, carbs: 23, fat: 0.7 },
+  { name: 'Curuba', kcal: 45, protein: 0.7, carbs: 11, fat: 0.1 },
+  { name: 'Feijoa', kcal: 55, protein: 1, carbs: 13, fat: 0.6 },
+  { name: 'Mango', kcal: 60, protein: 0.8, carbs: 15, fat: 0.4 },
+  { name: 'Papaya', kcal: 43, protein: 0.5, carbs: 11, fat: 0.3 },
+  { name: 'Mora de Castilla', kcal: 43, protein: 1.4, carbs: 10, fat: 0.5 },
+  { name: 'Guanábana', kcal: 66, protein: 1, carbs: 17, fat: 0.3 },
+  { name: 'Chontaduro', kcal: 180, protein: 3.3, carbs: 32, fat: 6.6 },
+  { name: 'Ahuyama (calabaza, cocida)', kcal: 26, protein: 1, carbs: 6.5, fat: 0.1 },
+  { name: 'Habichuela (judía verde, cocida)', kcal: 35, protein: 2, carbs: 7, fat: 0.1 },
+  { name: 'Hogao (salsa criolla tomate-cebolla)', kcal: 55, protein: 1, carbs: 6, fat: 3 },
+  { name: 'Café negro (sin azúcar)', kcal: 2, protein: 0.1, carbs: 0, fat: 0 },
+  { name: 'Chicha (bebida de maíz)', kcal: 50, protein: 0.5, carbs: 11, fat: 0.1 },
+  { name: 'Masato', kcal: 55, protein: 0.3, carbs: 13, fat: 0.1 },
 ];
 
+// ---- Búsqueda en la base local ----
+function searchLocalFoodDB(query, limit = 8) {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const starts = [];
+  const contains = [];
+  FOOD_DB.forEach(f => {
+    const n = f.name.toLowerCase();
+    if (n.startsWith(q)) starts.push(f);
+    else if (n.includes(q)) contains.push(f);
+  });
+  return [...starts, ...contains].slice(0, limit).map(f => ({
+    name: f.name, brand: '', kcal: f.kcal, protein: f.protein, carbs: f.carbs, fat: f.fat, source: 'Local'
+  }));
+}
+
+// Usada por el flujo antiguo (compatibilidad): estimación exacta por nombre+gramos desde la base local.
 function estimateFromLocalDB(foodName, grams) {
   const q = foodName.trim().toLowerCase();
   const match = FOOD_DB.find(f => f.name.toLowerCase() === q) ||
@@ -52,5 +129,67 @@ function estimateFromLocalDB(foodName, grams) {
     carbs: Math.round(match.carbs * factor * 10) / 10,
     fat: Math.round(match.fat * factor * 10) / 10,
     matchedName: match.name
+  };
+}
+
+// ==================== Open Food Facts (API pública, sin key) ====================
+async function searchOpenFoodFacts(query, limit = 6) {
+  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=${limit}&lc=es`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Error consultando Open Food Facts');
+  const json = await res.json();
+  return (json.products || [])
+    .filter(p => p.product_name && p.nutriments && p.nutriments['energy-kcal_100g'] != null)
+    .slice(0, limit)
+    .map(p => ({
+      name: p.product_name,
+      brand: p.brands ? p.brands.split(',')[0].trim() : '',
+      kcal: Number(p.nutriments['energy-kcal_100g']) || 0,
+      protein: Number(p.nutriments['proteins_100g']) || 0,
+      carbs: Number(p.nutriments['carbohydrates_100g']) || 0,
+      fat: Number(p.nutriments['fat_100g']) || 0,
+      source: 'Open Food Facts'
+    }));
+}
+
+// ==================== USDA FoodData Central (API pública, DEMO_KEY por defecto) ====================
+async function searchUSDA(query, limit = 6) {
+  const apiKey = (Store.data.profile.usdaApiKey || '').trim() || 'DEMO_KEY';
+  const url = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${encodeURIComponent(apiKey)}&query=${encodeURIComponent(query)}&pageSize=${limit}&dataType=Foundation,SR%20Legacy,Survey%20(FNDDS)`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Error consultando USDA FoodData Central');
+  const json = await res.json();
+  const nutrientValue = (foodNutrients, name, unit) => {
+    const matches = (foodNutrients || []).filter(n => n.nutrientName === name);
+    const n = (unit && matches.find(m => m.unitName === unit)) || matches[0];
+    return n ? Number(n.value) || 0 : 0;
+  };
+  return (json.foods || []).slice(0, limit).map(f => ({
+    name: f.description ? f.description.charAt(0) + f.description.slice(1).toLowerCase() : 'Alimento',
+    brand: f.brandName || '',
+    kcal: nutrientValue(f.foodNutrients, 'Energy', 'KCAL'),
+    protein: nutrientValue(f.foodNutrients, 'Protein'),
+    carbs: nutrientValue(f.foodNutrients, 'Carbohydrate, by difference'),
+    fat: nutrientValue(f.foodNutrients, 'Total lipid (fat)'),
+    source: 'USDA'
+  }));
+}
+
+// ==================== Búsqueda combinada ====================
+// Combina la base local (instantánea) con Open Food Facts y USDA (en paralelo, tolerando fallos).
+async function searchAllFoodSources(query) {
+  const local = searchLocalFoodDB(query);
+  const [offResult, usdaResult] = await Promise.allSettled([
+    searchOpenFoodFacts(query),
+    searchUSDA(query)
+  ]);
+  const off = offResult.status === 'fulfilled' ? offResult.value : [];
+  const usda = usdaResult.status === 'fulfilled' ? usdaResult.value : [];
+  return {
+    results: [...local, ...usda, ...off].filter(r => r.kcal > 0).slice(0, 20),
+    errors: {
+      off: offResult.status === 'rejected',
+      usda: usdaResult.status === 'rejected'
+    }
   };
 }

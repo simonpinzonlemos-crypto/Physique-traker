@@ -215,6 +215,15 @@
     </div>
 
     <div class="card">
+      <p class="card-label">Búsqueda de alimentos</p>
+      <p class="hint-text">La búsqueda de comidas usa una base local (con platos colombianos) más las bases públicas de <span class="code">Open Food Facts</span> y <span class="code">USDA FoodData Central</span>. Por defecto USDA usa una clave de demostración con límite bajo de consultas; si buscas mucho y empieza a fallar, consigue tu clave gratuita en <span class="code">api.data.gov/signup</span> y pégala aquí.</p>
+      <form id="form-usda-key" class="form-inline">
+        <input type="text" id="p-usda-key" placeholder="Clave USDA (opcional)">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </form>
+    </div>
+
+    <div class="card">
       <p class="card-label">Datos</p>
       <div class="view-actions">
         <button class="btn btn-secondary" id="btn-export">⬇️ Exportar datos (JSON)</button>
@@ -289,17 +298,22 @@
   <div class="modal" id="modal-meal-manual">
     <h3>Registrar comida por peso</h3>
     <form id="form-meal-manual">
-      <label>Alimento
-        <input type="text" id="m-name" list="food-datalist" placeholder="Ej: Pechuga de pollo (cocida)" required>
-        <datalist id="food-datalist"></datalist>
+      <label>Buscar alimento
+        <input type="text" id="m-search" placeholder="Ej: arepa, pollo, avena..." autocomplete="off">
       </label>
-      <label>Cantidad (gramos)
-        <input type="number" id="m-grams" min="1" max="3000" value="100" required>
-      </label>
-      <div id="m-manual-result" class="ai-result"></div>
+      <p class="hint-text" id="m-search-status" style="margin:0 0 8px;"></p>
+      <div id="m-search-results" class="food-results"></div>
+
+      <div id="m-selected-box" class="ai-result" style="display:none;">
+        <p class="ar-title" id="m-selected-name"></p>
+        <label>Cantidad (gramos)
+          <input type="number" id="m-grams" min="1" max="3000" value="100">
+        </label>
+        <div id="m-computed" style="margin-top:8px;"></div>
+      </div>
+
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
-        <button type="button" class="btn btn-secondary" id="btn-estimate-manual">Calcular</button>
         <button type="submit" class="btn btn-primary" id="btn-save-manual" disabled>Guardar</button>
       </div>
     </form>
