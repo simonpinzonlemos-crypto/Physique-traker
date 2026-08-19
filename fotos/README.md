@@ -1,6 +1,6 @@
 # Fotos de comidas para agregar a la base de datos
 
-Carpeta para fotos de comidas o etiquetas nutricionales que **no** aparecen en la búsqueda de la app (base local, Open Food Facts, ni tus alimentos personalizados).
+Carpeta para fotos de comidas o etiquetas nutricionales que **no** aparecen en la búsqueda de la app (base local ni tus alimentos personalizados).
 
 ## Cómo se usa
 

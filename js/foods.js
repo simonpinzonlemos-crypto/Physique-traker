@@ -156,36 +156,3 @@ function parseNutritionLabel(text) {
   };
 }
 
-// ==================== Open Food Facts (API pública, sin key) ====================
-async function searchOpenFoodFacts(query, limit = 6) {
-  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=${limit}&lc=es`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Error consultando Open Food Facts');
-  const json = await res.json();
-  return (json.products || [])
-    .filter(p => p.product_name && p.nutriments && p.nutriments['energy-kcal_100g'] != null)
-    .slice(0, limit)
-    .map(p => ({
-      name: p.product_name,
-      brand: p.brands ? p.brands.split(',')[0].trim() : '',
-      kcal: Number(p.nutriments['energy-kcal_100g']) || 0,
-      protein: Number(p.nutriments['proteins_100g']) || 0,
-      carbs: Number(p.nutriments['carbohydrates_100g']) || 0,
-      fat: Number(p.nutriments['fat_100g']) || 0,
-      source: 'Open Food Facts'
-    }));
-}
-
-// ==================== Búsqueda combinada ====================
-// Combina la base local + personal (instantánea) con Open Food Facts (tolerando fallos).
-async function searchAllFoodSources(query) {
-  const local = searchLocalFoodDB(query);
-  const [offResult] = await Promise.allSettled([searchOpenFoodFacts(query)]);
-  const off = offResult.status === 'fulfilled' ? offResult.value : [];
-  return {
-    results: [...local, ...off].filter(r => r.kcal > 0).slice(0, 20),
-    errors: {
-      off: offResult.status === 'rejected'
-    }
-  };
-}

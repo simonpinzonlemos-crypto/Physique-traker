@@ -445,11 +445,9 @@ function bindExerciseModal() {
   });
 }
 
-// ---- Modal: Comida manual (por peso, búsqueda en Local + personalizados + Open Food Facts) ----
+// ---- Modal: Comida manual (por peso, búsqueda en base local colombiana + alimentos personalizados) ----
 function bindMealManualModal() {
   let selectedFood = null;
-  let searchToken = 0;
-  let searchDebounce = null;
 
   document.getElementById('btn-open-meal-manual').addEventListener('click', () => {
     document.getElementById('form-meal-manual').reset();
@@ -465,7 +463,6 @@ function bindMealManualModal() {
 
   document.getElementById('m-search').addEventListener('input', (e) => {
     const query = e.target.value.trim();
-    clearTimeout(searchDebounce);
     document.getElementById('m-selected-box').style.display = 'none';
     document.getElementById('btn-save-manual').disabled = true;
     selectedFood = null;
@@ -475,25 +472,10 @@ function bindMealManualModal() {
       document.getElementById('m-search-status').textContent = '';
       return;
     }
-    document.getElementById('m-search-status').textContent = 'Buscando…';
-    searchDebounce = setTimeout(() => runFoodSearch(query), 450);
-  });
-
-  async function runFoodSearch(query) {
-    const myToken = ++searchToken;
-    const { results, errors } = await searchAllFoodSources(query);
-    if (myToken !== searchToken) return; // llegó una búsqueda más nueva mientras esperábamos
-
-    const status = document.getElementById('m-search-status');
-    if (!results.length) {
-      status.textContent = 'Sin resultados. Prueba con otro nombre o agrega el alimento a mano.';
-    } else if (errors.off) {
-      status.textContent = 'Open Food Facts no respondió, mostrando lo demás.';
-    } else {
-      status.textContent = '';
-    }
+    const results = searchLocalFoodDB(query);
+    document.getElementById('m-search-status').textContent = results.length ? '' : 'Sin resultados. Prueba con otro nombre o agrega el alimento a mano.';
     renderFoodResults(results);
-  }
+  });
 
   function renderFoodResults(items) {
     const container = document.getElementById('m-search-results');
@@ -502,10 +484,10 @@ function bindMealManualModal() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'food-result-item';
-      const badgeClass = item.source === 'Local' ? 'local' : item.source === 'Personal' ? 'personal' : 'off';
+      const badgeClass = item.source === 'Local' ? 'local' : 'personal';
       btn.innerHTML = `
-        <span class="food-source-badge ${badgeClass}">${item.source === 'Open Food Facts' ? 'OFF' : item.source}</span>
-        <span class="fr-name">${escapeHtml(item.name)}${item.brand ? ' · ' + escapeHtml(item.brand) : ''}</span>
+        <span class="food-source-badge ${badgeClass}">${item.source}</span>
+        <span class="fr-name">${escapeHtml(item.name)}</span>
         <span class="fr-kcal">${Math.round(item.kcal)} kcal/100g</span>
       `;
       btn.addEventListener('click', () => selectFood(item, btn));
