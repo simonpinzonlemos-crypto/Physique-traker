@@ -306,6 +306,10 @@
         <label>Nombre del alimento
           <input type="text" id="cf-name" placeholder="Ej: Sopa de mi abuela">
         </label>
+        <label style="margin-top:8px;">📷 O escanea la etiqueta nutricional (foto, opcional)
+          <input type="file" accept="image/*" capture="environment" id="cf-label-photo">
+        </label>
+        <p class="hint-text" id="cf-ocr-status" style="margin:4px 0 0;"></p>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
           <label>Calorías /100g
             <input type="number" id="cf-kcal" min="0" max="900">
@@ -370,6 +374,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/foods.js"></script>
 <script src="js/charts.js"></script>

@@ -548,6 +548,32 @@ function bindMealManualModal() {
       document.getElementById('cf-protein').value = '';
       document.getElementById('cf-carbs').value = '';
       document.getElementById('cf-fat').value = '';
+      document.getElementById('cf-ocr-status').textContent = '';
+      document.getElementById('cf-label-photo').value = '';
+    }
+  });
+
+  document.getElementById('cf-label-photo').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const status = document.getElementById('cf-ocr-status');
+    if (typeof Tesseract === 'undefined') {
+      status.textContent = 'No se pudo cargar el lector de etiquetas (revisa tu conexión). Completa los datos a mano.';
+      return;
+    }
+    status.textContent = 'Leyendo etiqueta… puede tardar unos segundos.';
+    try {
+      const result = await Tesseract.recognize(file, 'spa');
+      const parsed = parseNutritionLabel(result.data.text);
+      if (parsed.kcal != null) document.getElementById('cf-kcal').value = parsed.kcal;
+      if (parsed.protein != null) document.getElementById('cf-protein').value = parsed.protein;
+      if (parsed.carbs != null) document.getElementById('cf-carbs').value = parsed.carbs;
+      if (parsed.fat != null) document.getElementById('cf-fat').value = parsed.fat;
+      status.textContent = parsed.kcal != null
+        ? 'Listo — revisa que los números sean correctos antes de guardar.'
+        : 'No pude leer las calorías con claridad. Revisa y completa los datos a mano.';
+    } catch (err) {
+      status.textContent = 'No se pudo leer la etiqueta. Completa los datos a mano.';
     }
   });
 

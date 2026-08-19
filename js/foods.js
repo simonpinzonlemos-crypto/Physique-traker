@@ -136,6 +136,26 @@ function estimateFromLocalDB(foodName, grams) {
   };
 }
 
+// ==================== OCR de etiquetas nutricionales (Tesseract.js, gratis, en el navegador) ====================
+// Busca en el texto extraído los números junto a las palabras clave típicas de una tabla nutricional.
+function parseNutritionLabel(text) {
+  const norm = text.toLowerCase().replace(/,/g, '.');
+  function findNumber(keywords) {
+    for (const kw of keywords) {
+      const regex = new RegExp(kw + '[^0-9]{0,15}([0-9]+(?:\\.[0-9]+)?)', 'i');
+      const m = norm.match(regex);
+      if (m) return parseFloat(m[1]);
+    }
+    return null;
+  }
+  return {
+    kcal: findNumber(['calor[ií]as?', 'energ[ií]a', 'valor energ[eé]tico', 'calories']),
+    protein: findNumber(['prote[ií]nas?', 'protein']),
+    carbs: findNumber(['carbohidratos?(?:\\s+totales)?', 'hidratos\\s+de\\s+carbono', 'carbohydrate']),
+    fat: findNumber(['grasas?(?:\\s+total(?:es)?)?', '\\bfat\\b'])
+  };
+}
+
 // ==================== Open Food Facts (API pública, sin key) ====================
 async function searchOpenFoodFacts(query, limit = 6) {
   const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=${limit}&lc=es`;
