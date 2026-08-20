@@ -219,6 +219,39 @@ function renderMeals() {
 
   const history = Store.data.meals.filter(m => m.date !== today);
   renderMealList(document.getElementById('meals-history-list'), history, false);
+
+  renderCalorieBalance(today, total);
+}
+
+function renderCalorieBalance(today, todayConsumed) {
+  const todayBurn = Store.data.calorieBurns.find(b => b.date === today);
+  const burnedVal = todayBurn ? todayBurn.kcal : null;
+
+  document.getElementById('balance-consumed').textContent = todayConsumed;
+  document.getElementById('balance-burned').textContent = burnedVal != null ? burnedVal : '--';
+
+  const diffEl = document.getElementById('balance-diff');
+  const diffItem = document.getElementById('balance-diff-item');
+  diffItem.classList.remove('deficit', 'surplus');
+  if (burnedVal != null) {
+    const diff = burnedVal - todayConsumed;
+    const sign = diff > 0 ? '+' : '';
+    diffEl.textContent = `${sign}${diff} kcal`;
+    diffItem.classList.add(diff >= 0 ? 'deficit' : 'surplus');
+  } else {
+    diffEl.textContent = '--';
+  }
+
+  const points = [];
+  for (let i = 13; i >= 0; i--) {
+    const date = addDays(today, -i);
+    const consumed = Store.data.meals.filter(m => m.date === date).reduce((s, m) => s + m.calories, 0);
+    const burn = Store.data.calorieBurns.find(b => b.date === date);
+    points.push({ label: fmtShort(date), a: consumed, b: burn ? burn.kcal : 0 });
+  }
+  renderComparisonChart(document.getElementById('balance-chart'), points, {
+    colorA: '#fbbf24', colorB: '#4ade80', labelA: 'Consumidas', labelB: 'Quemadas'
+  });
 }
 
 function currentView() {
@@ -402,6 +435,7 @@ function init() {
   bindWeightModal();
   bindExerciseModal();
   bindMealManualModal();
+  bindCalorieBurnModal();
   bindBodyFatModal();
   bindSettings();
 
@@ -420,6 +454,24 @@ function bindWeightModal() {
     Store.addWeight(document.getElementById('w-kg').value, document.getElementById('w-date').value);
     closeModal();
     toast('Peso registrado ✅');
+    renderView(currentView());
+  });
+}
+
+// ---- Modal: Calorías quemadas ----
+function bindCalorieBurnModal() {
+  document.getElementById('btn-open-calorie-burn').addEventListener('click', () => {
+    const today = todayStr();
+    const existing = Store.data.calorieBurns.find(b => b.date === today);
+    document.getElementById('cb-date').value = today;
+    document.getElementById('cb-kcal').value = existing ? existing.kcal : '';
+    openModal('modal-calorie-burn');
+  });
+  document.getElementById('form-calorie-burn').addEventListener('submit', (e) => {
+    e.preventDefault();
+    Store.addCalorieBurn(document.getElementById('cb-kcal').value, document.getElementById('cb-date').value);
+    closeModal();
+    toast('Calorías quemadas registradas 🔥');
     renderView(currentView());
   });
 }

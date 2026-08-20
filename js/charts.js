@@ -93,3 +93,44 @@ function renderBarChart(container, points, { color = '#60a5fa', height = 150 } =
 
   container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="xMidYMid meet">${bars}</svg>`;
 }
+
+// Gráfico de barras agrupadas: dos series por punto (ej. consumidas vs quemadas).
+function renderComparisonChart(container, points, { colorA = '#fbbf24', colorB = '#4ade80', labelA = 'A', labelB = 'B', height = 170 } = {}) {
+  container.innerHTML = '';
+  if (!points || points.length === 0) {
+    container.innerHTML = '<p class="empty-hint">Aún no hay datos suficientes.</p>';
+    return;
+  }
+  const width = container.clientWidth || 600;
+  const padding = { top: 16, right: 12, bottom: 24, left: 12 };
+  const maxVal = Math.max(1, ...points.map(p => Math.max(p.a, p.b)));
+  const innerW = width - padding.left - padding.right;
+  const innerH = height - padding.top - padding.bottom;
+  const groupW = innerW / points.length;
+  const barW = Math.max(3, Math.min(14, groupW * 0.3));
+  const gap = 2;
+
+  let gridSvg = '';
+  const gridLines = 3;
+  for (let i = 0; i <= gridLines; i++) {
+    const v = (maxVal / gridLines) * i;
+    const gy = padding.top + innerH - (v / maxVal) * innerH;
+    gridSvg += `<line x1="${padding.left}" y1="${gy.toFixed(1)}" x2="${width - padding.right}" y2="${gy.toFixed(1)}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>`;
+  }
+
+  let bars = '';
+  points.forEach((p, i) => {
+    const groupCenter = padding.left + groupW * i + groupW / 2;
+    const hA = (p.a / maxVal) * innerH;
+    const hB = (p.b / maxVal) * innerH;
+    const xA = groupCenter - barW - gap / 2;
+    const xB = groupCenter + gap / 2;
+    bars += `<rect x="${xA.toFixed(1)}" y="${(padding.top + innerH - hA).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1, hA).toFixed(1)}" rx="2.5" fill="${colorA}"><title>${p.label} · ${labelA}: ${Math.round(p.a)}</title></rect>`;
+    bars += `<rect x="${xB.toFixed(1)}" y="${(padding.top + innerH - hB).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1, hB).toFixed(1)}" rx="2.5" fill="${colorB}"><title>${p.label} · ${labelB}: ${Math.round(p.b)}</title></rect>`;
+    bars += `<text x="${groupCenter.toFixed(1)}" y="${(padding.top + innerH + 15).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="var(--text-dim)">${p.label}</text>`;
+  });
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="xMidYMid meet">${gridSvg}${bars}</svg>
+    <div class="chart-legend"><span><i style="background:${colorA}"></i>${labelA}</span><span><i style="background:${colorB}"></i>${labelB}</span></div>`;
+}

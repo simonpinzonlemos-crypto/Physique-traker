@@ -17,7 +17,8 @@ const DEFAULT_DATA = {
   meals: [],       // {id, date, time, description, calories, protein, carbs, fat}
   exercises: [],   // {id, date, type, durationMin, notes}
   bodyfat: [],     // {id, date, percentage, heightCm, neckCm, waistCm, hipCm}
-  customFoods: []  // {id, name, kcal, protein, carbs, fat} — alimentos que el usuario agrega a mano
+  customFoods: [], // {id, name, kcal, protein, carbs, fat} — alimentos que el usuario agrega a mano
+  calorieBurns: [] // {id, date, kcal} — calorías quemadas ese día (una por día, se sobreescribe)
 };
 
 function loadData() {
@@ -32,7 +33,8 @@ function loadData() {
       meals: parsed.meals || [],
       exercises: parsed.exercises || [],
       bodyfat: parsed.bodyfat || [],
-      customFoods: parsed.customFoods || []
+      customFoods: parsed.customFoods || [],
+      calorieBurns: parsed.calorieBurns || []
     };
   } catch (e) {
     console.error('Error leyendo datos locales, se reinicia el almacenamiento.', e);
@@ -138,6 +140,26 @@ const Store = {
     this.save();
   },
 
+  // --- calorías quemadas ---
+  addCalorieBurn(kcal, date) {
+    const d = date || todayStr();
+    const existing = this.data.calorieBurns.find(b => b.date === d);
+    if (existing) {
+      existing.kcal = Math.round(Number(kcal) || 0);
+      this.save();
+      return existing;
+    }
+    const entry = { id: genId(), date: d, kcal: Math.round(Number(kcal) || 0) };
+    this.data.calorieBurns.push(entry);
+    this.data.calorieBurns.sort((a, b) => a.date.localeCompare(b.date));
+    this.save();
+    return entry;
+  },
+  deleteCalorieBurn(id) {
+    this.data.calorieBurns = this.data.calorieBurns.filter(b => b.id !== id);
+    this.save();
+  },
+
   // --- alimentos personalizados ---
   addCustomFood(food) {
     const entry = {
@@ -168,7 +190,8 @@ const Store = {
       meals: parsed.meals || [],
       exercises: parsed.exercises || [],
       bodyfat: parsed.bodyfat || [],
-      customFoods: parsed.customFoods || []
+      customFoods: parsed.customFoods || [],
+      calorieBurns: parsed.calorieBurns || []
     };
     this.save();
   }
